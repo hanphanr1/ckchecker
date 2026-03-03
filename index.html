@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netflix Cookies Checker</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Layout: 2 cột trên, Results full width bên dưới */
+        .single-tab-content .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .results-section {
+            margin-top: 24px;
+        }
+
+        .results-section .card {
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .single-tab-content .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .tab {
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header-controls">
+            <a href="/docs" class="btn-api" target="_blank">
+                <i class="fas fa-book"></i> <span data-i18n="apiDocs">Tài liệu API</span>
+            </a>
+            <div class="lang-switch">
+                <button class="lang-btn active" data-lang="vi">VI</button>
+                <button class="lang-btn" data-lang="en">EN</button>
+            </div>
+        </div>
+
+        <header>
+            <!-- Tiêu đề KHÔNG dịch -->
+            <div class="logo">TPTTH CAMEYOUSHOP</div>
+            <div class="tagline" data-i18n="tagline">ZALO : 0353099675 - WEB:CAMEYOU.SHOP</div>
+        </header>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="single" data-i18n="tabSingle">Nhập Đơn</div>
+            <div class="tab" data-tab="batch" data-i18n="tabBatch">Xử Lý Hàng Loạt</div>
+            <div class="tab" data-tab="about" data-i18n="tabAbout">Giới Thiệu</div>
+        </div>
+
+        <!-- TAB 1: SINGLE INPUT -->
+        <div class="tab-content active single-tab-content" id="single-tab">
+            <!-- Hàng trên: 2 card cạnh nhau -->
+            <div class="main-content">
+                <!-- Card 1: Nhập Cookie -->
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-cookie"></i>
+                        <span data-i18n="cardCookieTitle">Nhập Cookie</span>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="cookie-input" data-i18n="cookieLabel">Dán cookie Netflix của bạn vào đây:</label>
+                        <textarea id="cookie-input" data-i18n-placeholder="cookiePlaceholder"
+                            placeholder="Dán cookie theo định dạng JSON, text hoặc Netscape..."></textarea>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn" id="load-file-btn">
+                            <i class="fas fa-file-import"></i>
+                            <span data-i18n="btnLoadFile">Tải từ File</span>
+                        </button>
+                        <button class="btn btn-secondary" id="paste-btn">
+                            <i class="fas fa-paste"></i>
+                            <span data-i18n="btnPaste">Dán Clipboard</span>
+                        </button>
+                        <button class="btn btn-secondary" id="clear-btn">
+                            <i class="fas fa-broom"></i>
+                            <span data-i18n="btnClear">Xóa</span>
+                        </button>
+                    </div>
+
+                    <div class="mode-toggle" style="margin-top: 15px;">
+                        <div class="mode-option active" data-mode="fullinfo" data-i18n="modeFullInfo">Thông Tin Đầy Đủ
+                        </div>
+                        <div class="mode-option" data-mode="tokenonly" data-i18n="modeTokenOnly">Chỉ Token</div>
+                    </div>
+
+                    <button class="btn btn-success" id="generate-btn" style="width: 100%;">
+                        <i class="fas fa-key"></i>
+                        <span data-i18n="btnGenerate">Tạo Token</span>
+                    </button>
+
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress" id="progress"></div>
+                        </div>
+                        <div class="status" id="status" data-i18n="statusReady">Sẵn sàng</div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Telegram -->
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fab fa-telegram"></i>
+                        <span data-i18n="cardTelegramTitle">Gửi Kết Quả Telegram</span>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="telegram-toggle">
+                            <span class="toggle-slider"></span>
+                            <span data-i18n="telegramToggleLabel">Bật gửi Telegram</span>
+                        </label>
+                    </div>
+
+                    <div id="telegram-config" class="telegram-config" style="display: none;">
+                        <div class="input-group">
+                            <label for="bot-token" data-i18n="telegramBotToken">Bot Token:</label>
+                            <input type="text" id="bot-token" placeholder="1234567890:ABCdefGHIjklMNOpqrsTUVwxyz">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="chat-id" data-i18n="telegramChatId">Chat ID:</label>
+                            <input type="text" id="chat-id" placeholder="123456789">
+                        </div>
+
+                        <div class="input-group">
+                            <button class="btn btn-secondary" id="test-telegram-btn">
+                                <i class="fas fa-paper-plane"></i>
+                                <span data-i18n="btnTestTelegram">Kiểm Tra Kết Nối</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="telegram-status" id="telegram-status">
+                        <i class="fas fa-info-circle"></i>
+                        <span data-i18n="telegramDisabled">Telegram đang tắt</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hàng dưới: Results full width -->
+            <div class="results-section">
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-chart-line"></i>
+                        <span data-i18n="cardResultsTitle">Kết Quả</span>
+                    </div>
+
+                    <div class="results-container">
+                        <div class="results" id="results">
+                            <div class="result-item">
+                                <div class="result-title">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span data-i18n="noResultsTitle">Chưa có kết quả</span>
+                                </div>
+                                <div class="result-content" data-i18n="noResultsContent">
+                                    Hãy xử lý cookie để xem kết quả tại đây.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn" id="copy-results-btn" style="width: 100%; margin-top: 15px;" disabled>
+                        <i class="fas fa-copy"></i>
+                        <span data-i18n="btnCopyResults">Sao Chép Kết Quả</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: BATCH PROCESSING -->
+        <div class="tab-content" id="batch-tab">
+            <div class="main-content">
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-folder-open"></i>
+                        <span data-i18n="cardBatchTitle">Xử Lý Hàng Loạt</span>
+                    </div>
+
+                    <div class="input-group">
+                        <label data-i18n="batchFileLabel">Chọn nhiều file cookie:</label>
+                        <input type="file" id="batch-files" multiple accept=".txt,.json,.zip" style="padding: 8px;">
+                    </div>
+
+                    <div class="file-list" id="file-list">
+                        <div class="file-item">
+                            <span data-i18n="noFilesSelected">Chưa chọn file nào</span>
+                        </div>
+                    </div>
+
+                    <div class="mode-toggle">
+                        <div class="mode-option active" data-mode="fullinfo" data-i18n="modeFullInfo">Thông Tin Đầy Đủ
+                        </div>
+                        <div class="mode-option" data-mode="tokenonly" data-i18n="modeTokenOnly">Chỉ Token</div>
+                    </div>
+
+                    <button class="btn btn-success" id="process-batch-btn" style="width: 100%;">
+                        <i class="fas fa-cogs"></i>
+                        <span data-i18n="btnProcessBatch">Xử Lý Tất Cả</span>
+                    </button>
+
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress" id="batch-progress"></div>
+                        </div>
+                        <div class="status" id="batch-status" data-i18n="batchStatusReady">Sẵn sàng</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-chart-bar"></i>
+                        <span data-i18n="cardBatchResultsTitle">Kết Quả Hàng Loạt</span>
+                    </div>
+
+                    <div class="summary">
+                        <div class="summary-title" data-i18n="batchSummaryTitle">Tổng Kết Xử Lý</div>
+                        <div class="summary-stats">
+                            <div class="stat total">
+                                <div class="stat-value" id="total-files">0</div>
+                                <div class="stat-label" data-i18n="statTotalFiles">Tổng File</div>
+                            </div>
+                            <div class="stat valid">
+                                <div class="stat-value" id="valid-files">0</div>
+                                <div class="stat-label" data-i18n="statValidFiles">Hợp Lệ</div>
+                            </div>
+                            <div class="stat invalid">
+                                <div class="stat-value" id="invalid-files">0</div>
+                                <div class="stat-label" data-i18n="statInvalidFiles">Không Hợp Lệ</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="results-container">
+                        <div class="file-list" id="batch-results" style="max-height: 300px; margin-top: 15px;">
+                            <div class="file-item">
+                                <span data-i18n="noResultsYet">Chưa có kết quả</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn" id="save-results-btn" style="width: 100%; margin-top: 15px;" disabled>
+                        <i class="fas fa-save"></i>
+                        <span data-i18n="btnSaveResults">Lưu Kết Quả</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: GIỚI THIỆU -->
+        <div class="tab-content" id="about-tab">
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-info-circle"></i>
+                    <span data-i18n="aboutTitle">Giới Thiệu Netflix Cookies Checker</span>
+                </div>
+
+                <p data-i18n="aboutDesc1">Ứng dụng này trích xuất <strong>NetflixId</strong> từ nhiều định dạng cookie
+                    khác nhau và tạo ra link đăng nhập trực tiếp vào tài khoản Netflix.</p>
+                <p style="margin-top: 10px;" data-i18n="aboutDesc2">Web này check cookie và gen link login app Netflix
+                    qua link</p>
+
+                <h3 style="margin: 20px 0 10px; color: var(--primary);" data-i18n="featuresTitle">Tính Năng:</h3>
+                <ul style="padding-left: 20px; margin-bottom: 20px;">
+                    <li data-i18n="feature1">Trích xuất NetflixId từ file text, JSON hoặc cookie</li>
+                    <li data-i18n="feature2">Kiểm tra tính hợp lệ và thông tin tài khoản</li>
+                    <li data-i18n="feature3">Tạo token đăng nhập trực tiếp</li>
+                    <li data-i18n="feature4">Xử lý hàng loạt nhiều file cùng lúc</li>
+                    <li data-i18n="feature5">Gửi kết quả hợp lệ qua Telegram</li>
+                </ul>
+
+                <h3 style="margin: 20px 0 10px; color: var(--primary);" data-i18n="formatsTitle">Định Dạng Hỗ Trợ:</h3>
+                <ul style="padding-left: 20px; margin-bottom: 20px;">
+                    <li data-i18n="format1">File text chứa cookie</li>
+                    <li data-i18n="format2">File JSON chứa cookie</li>
+                    <li data-i18n="format3">File ZIP chứa nhiều file cookie</li>
+                    <li data-i18n="format4">Chuỗi header có cookie NetflixId</li>
+                    <li data-i18n="format5">File cookie định dạng Netscape</li>
+                </ul>
+
+                <h3 style="margin: 20px 0 10px; color: var(--primary);" data-i18n="telegramSetupTitle">Cài Đặt Telegram:
+                </h3>
+                <ol style="padding-left: 20px; margin-bottom: 20px;">
+                    <li data-i18n="telegramStep1">Tạo bot với @BotFather trên Telegram</li>
+                    <li data-i18n="telegramStep2">Lấy token bot từ BotFather</li>
+                    <li data-i18n="telegramStep3">Mở chat với bot và gửi bất kỳ tin nhắn nào</li>
+                    <li data-i18n="telegramStep4">Lấy Chat ID tại:
+                        https://api.telegram.org/bot&lt;YourBOTToken&gt;/getUpdates</li>
+                    <li data-i18n="telegramStep5">Bật tính năng gửi Telegram và nhập thông tin xác thực</li>
+                </ol>
+
+                <h3 style="margin: 20px 0 10px; color: var(--primary);" data-i18n="usageTitle">Hướng Dẫn Sử Dụng:</h3>
+                <ol style="padding-left: 20px; margin-bottom: 20px;">
+                    <li data-i18n="usageStep1">Dán cookie hoặc tải từ file ở tab <strong>Nhập Đơn</strong></li>
+                    <li data-i18n="usageStep2">Cấu hình gửi Telegram nếu muốn (tùy chọn)</li>
+                    <li data-i18n="usageStep3">Chọn chế độ xuất dữ liệu (Thông Tin Đầy Đủ hoặc Chỉ Token)</li>
+                    <li data-i18n="usageStep4">Nhấn <strong>"Tạo Token"</strong> để xử lý</li>
+                    <li data-i18n="usageStep5">Để xử lý nhiều file, dùng tab <strong>Xử Lý Hàng Loạt</strong></li>
+                </ol>
+
+                <p style="margin-top: 20px; padding: 15px; background-color: rgba(0, 0, 0, 0.3); border-radius: var(--border-radius);"
+                    data-i18n="aboutNote">
+                    <strong>Lưu ý:</strong> Công cụ này chỉ dành cho mục đích học tập và nghiên cứu.
+                </p>
+            </div>
+        </div>
+
+        <footer>
+            <p data-i18n="footerText">TPTTH CAMEYOUSHOP &copy; 2025</p>
+        </footer>
+    </div>
+
+    <div class="notification" id="notification">Thao tác hoàn tất!</div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
