@@ -10,7 +10,7 @@ from enum import Enum
 
 import aiohttp
 
-from utils import get_random_user_agent
+from checker_utils import get_random_user_agent
 
 
 class AccountStatus(Enum):

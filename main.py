@@ -9,7 +9,7 @@ from typing import List
 
 from checker import AccountChecker
 from proxy_manager import ProxyManager
-from utils import load_combos, save_result, setup_logging, get_results_file
+from checker_utils import load_combos, save_result, setup_logging, get_results_file
 
 
 async def main():

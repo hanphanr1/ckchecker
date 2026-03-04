@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 from netflix_login import NetflixLogin, AccountStatus, LoginResult
 from proxy_manager import ProxyManager
-from utils import save_result, setup_logging, get_results_file, format_combo
+from checker_utils import save_result, setup_logging, get_results_file, format_combo
 
 
 logger = setup_logging()
